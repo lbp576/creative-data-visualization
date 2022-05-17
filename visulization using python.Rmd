@@ -1,0 +1,84 @@
+---
+title: "Untitled"
+author: "Landon Porter"
+date: "5/13/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(reticulate)
+use_miniconda(condaenv = "r-reticulate", required = TRUE)
+py_install(envname="r-reticulate", packages=c("scipy", "numpy", "pandas", "matplotlib"))
+```
+
+
+
+```{python}
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import pandas as pd
+import matplotlib
+
+#Make plots look nice.
+#matplotlib inline
+tickfontsize=20
+plt.rc('text', usetex=False)
+plt.rc('xtick', labelsize=tickfontsize,direction='in',top=True)
+plt.rc('xtick.major',size=15,width=2)
+plt.rc('xtick.minor',size=8,width=2)
+plt.rc('ytick', labelsize=tickfontsize,direction='in',right=True)
+plt.rc('ytick.major',size=15,width=2)
+plt.rc('ytick.minor',size=8,width=2)
+
+axesfontsize=28
+legendfontsize=24
+
+#Read in data
+data = pd.read_csv('C:\\Users\\Landon\\Downloads\\stars.csv')
+
+#Load in the color map and set the min to 0 and the max to 1.
+cmap = plt.cm.get_cmap('plasma')
+norm = matplotlib.colors.Normalize(vmin=0,vmax=1)
+
+#Turn the temperatures into the a value between 0 and 1.
+tempcolor = (data['temp']-np.min(data['temp']))/(np.max(data['temp'])-np.min(data['temp']))
+
+#Plot the HR diagram, unfortunately to get the color for each star I need to loop through each star individually which takes a while.
+
+plt.figure(figsize=[8,8])
+
+ind = 0
+for ind in range(0,len(data['temp'])):
+    plt.plot(np.log10(data['temp'][ind]),data['absmag'][ind],marker='o',ms=2,color=cmap(norm(tempcolor[ind])))
+    ind = ind+1
+plt.ylim([20,-20])
+plt.xlim([np.log10(22500),np.log10(2000)])
+plt.xlabel('log(T)',fontsize=axesfontsize)
+plt.ylabel('Absolute Magnitude',fontsize=axesfontsize)
+
+plt.tight_layout(pad=2)
+plt.savefig('HRdiagram_5_12_22.png',facecolor='white',transparent=False)
+
+
+#Plot the RA and Dec values of the stars with the same temperature color scheme.
+plt.figure(figsize=[20,8])
+
+ind = 0
+for ind in range(0,len(data['temp'])):
+    plt.plot(data['ra'][ind],data['dec'][ind],marker='o',ms=2,color=cmap(norm(tempcolor[ind])))
+    ind = ind+1
+# plt.ylim([20,-15])
+# plt.xlim([np.log10(15000),np.log10(2000)])
+plt.xlabel('Right Ascension',fontsize=axesfontsize)
+plt.ylabel('Declination',fontsize=axesfontsize)
+
+
+plt.tight_layout(pad=2)
+plt.savefig('RADec_5_12_22.png',facecolor='white',transparent=False)
+
+
+```
